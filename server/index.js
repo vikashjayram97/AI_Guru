@@ -19,6 +19,10 @@ mongoose
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.error("MongoDB error:", err));
 
+app.get("/", (req, res) => {
+  res.send("AI Guru backend is running 🚀");
+});
+
 app.post("/ask", async (req, res) => {
   const question = req.body.question;
 
