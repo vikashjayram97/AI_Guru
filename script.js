@@ -7,10 +7,6 @@ async function sendMessage() {
   addMessage(message, "user");
   input.value = "";
 
-  app.get("/", (req, res) => {
-    res.send("AI Guru backend is running 🚀");
-  });
-
   try {
     const response = await fetch("https://ai-guru-lye7.onrender.com/ask", {
       method: "POST",
