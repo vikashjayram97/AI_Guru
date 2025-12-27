@@ -1,26 +1,10 @@
-require("dotenv").config();
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+import Groq from "groq-sdk";
 
-const mongoose = require("mongoose");
-
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log(err));
-
-const ChatSchema = new mongoose.Schema({
-  question: String,
-  answer: String,
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
-
-const Chat = mongoose.model("Chat", ChatSchema);
-
-const express = require("express");
-const cors = require("cors");
-const Groq = require("groq-sdk");
+dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -29,6 +13,11 @@ app.use(express.json());
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
+
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.error("MongoDB error:", err));
 
 app.post("/ask", async (req, res) => {
   const question = req.body.question;
@@ -40,7 +29,7 @@ app.post("/ask", async (req, res) => {
         {
           role: "system",
           content:
-            "You are AI Guru, an expert UPSC mentor. Explain concepts clearly, factually, and in simple language. Use UPSC-style explanation.",
+            "You are AI Guru, an expert UPSC mentor. Explain concepts clearly in simple language.",
         },
         {
           role: "user",
@@ -49,28 +38,19 @@ app.post("/ask", async (req, res) => {
       ],
     });
 
-    res.json({
-      answer: chatCompletion.choices[0].message.content,
-    });
-  } catch (error) {
-    console.error("GROQ ERROR 👉", error);
+    const answer = chatCompletion.choices[0].message.content;
 
+    res.json({ answer });
+  } catch (error) {
+    console.error("Groq error:", error);
     res.json({
       answer: "AI Guru is facing an issue. Please try again.",
     });
   }
 });
 
-await Chat.create({
-  question: question,
-  answer: chatCompletion.choices[0].message.content,
-});
+const PORT = process.env.PORT || 5000;
 
-app.get("/chats", async (req, res) => {
-  const chats = await Chat.find().sort({ createdAt: -1 });
-  res.json(chats);
-});
-
-app.listen(5000, () => {
-  console.log("AI Guru backend running on http://localhost:5000");
+app.listen(PORT, () => {
+  console.log(`AI Guru backend running on port ${PORT}`);
 });
