@@ -8,7 +8,7 @@ async function sendMessage() {
   input.value = "";
 
   try {
-    const response = await fetch("http://localhost:5000/ask", {
+    const response = await fetch("https://ai-guru-jf9q.onrender.com/ask", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
