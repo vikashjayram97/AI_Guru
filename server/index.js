@@ -24,7 +24,15 @@ app.get("/", (req, res) => {
 });
 
 app.post("/ask", async (req, res) => {
-  const question = req.body.question;
+  console.log("Incoming body:", req.body);
+
+  const question = req.body?.question;
+
+  if (!question) {
+    return res.status(400).json({
+      answer: "Invalid request. Question not received.",
+    });
+  }
 
   try {
     const chatCompletion = await groq.chat.completions.create({
@@ -32,8 +40,11 @@ app.post("/ask", async (req, res) => {
       messages: [
         {
           role: "system",
-          content:
-            "You are AI Guru, an expert UPSC mentor. Explain concepts clearly in simple language.",
+          content: `
+You are AI Guru, a strict UPSC Civil Services mentor.
+Answer only as per UPSC syllabus.
+Use structured answers: Introduction, Body, Conclusion.
+`,
         },
         {
           role: "user",
@@ -48,7 +59,7 @@ app.post("/ask", async (req, res) => {
   } catch (error) {
     console.error("Groq error:", error);
     res.json({
-      answer: "AI Guru is facing an issue. Please try again.",
+      answer: "AI Guru is facing an internal issue. Please try again.",
     });
   }
 });
