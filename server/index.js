@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import OpenAI from "openai";
+import Groq from "groq-sdk";
 
 dotenv.config();
 
@@ -10,8 +10,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 mongoose
@@ -35,8 +35,8 @@ app.post("/ask", async (req, res) => {
   }
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+    const chatCompletion = await groq.chat.completions.create({
+      model: "llama-3.1-8b-instant",
       messages: [
         {
           role: "system",
@@ -46,11 +46,7 @@ You are AI Guru, a strict UPSC Civil Services mentor.
 Rules:
 1. Answer only as per UPSC syllabus.
 2. Use simple, factual, exam-oriented language.
-3. Structure answers as:
-   - Introduction
-   - Body
-   - Conclusion
-4. If the question is out of syllabus, say so clearly.
+3. If the question is out of syllabus, clearly say so.
 `,
         },
         {
@@ -58,16 +54,17 @@ Rules:
           content: question,
         },
       ],
-      temperature: 0.3,
+      temperature: 0.2,
     });
 
     const answer = chatCompletion.choices[0].message.content;
-
     res.json({ answer });
   } catch (error) {
     console.error("Groq error:", error);
+
     res.json({
-      answer: "AI Guru is facing an internal issue. Please try again.",
+      answer:
+        "AI Guru is currently busy. Please wait a few seconds and try again.",
     });
   }
 });
