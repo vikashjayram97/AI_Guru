@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import Groq from "groq-sdk";
+import OpenAI from "openai";
 
 dotenv.config();
 
@@ -10,8 +10,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 mongoose
@@ -35,15 +35,22 @@ app.post("/ask", async (req, res) => {
   }
 
   try {
-    const chatCompletion = await groq.chat.completions.create({
-      model: "llama-3.1-8b-instant",
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
           content: `
 You are AI Guru, a strict UPSC Civil Services mentor.
-Answer only as per UPSC syllabus.
-Use structured answers: Introduction, Body, Conclusion.
+
+Rules:
+1. Answer only as per UPSC syllabus.
+2. Use simple, factual, exam-oriented language.
+3. Structure answers as:
+   - Introduction
+   - Body
+   - Conclusion
+4. If the question is out of syllabus, say so clearly.
 `,
         },
         {
@@ -51,6 +58,7 @@ Use structured answers: Introduction, Body, Conclusion.
           content: question,
         },
       ],
+      temperature: 0.3,
     });
 
     const answer = chatCompletion.choices[0].message.content;
