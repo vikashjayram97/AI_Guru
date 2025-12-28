@@ -1,8 +1,13 @@
 async function sendMessage() {
   const input = document.getElementById("userInput");
-  const message = input.value;
+  const message = input.value.trim();
 
-  if (message === "") return;
+  console.log("Sending message:", message);
+
+  if (!message) {
+    alert("Please enter a question");
+    return;
+  }
 
   addMessage(message, "user");
   input.value = "";
@@ -11,14 +16,19 @@ async function sendMessage() {
     const response = await fetch("https://ai-guru-lye7.onrender.com/ask", {
       method: "POST",
       headers: {
-        "Content`-Type": "application/json",
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ question: message }),
+      body: JSON.stringify({
+        question: message,
+      }),
     });
 
     const data = await response.json();
+    console.log("Backend response:", data);
+
     addMessage(data.answer, "ai");
   } catch (error) {
+    console.error("Fetch error:", error);
     addMessage("Error connecting to server", "ai");
   }
 }
