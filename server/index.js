@@ -19,8 +19,6 @@ mongoose
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.error("MongoDB error:", err));
 
-import mongoose from "mongoose";
-
 const chatSchema = new mongoose.Schema({
   question: {
     type: String,
