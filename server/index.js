@@ -19,6 +19,25 @@ mongoose
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.error("MongoDB error:", err));
 
+import mongoose from "mongoose";
+
+const chatSchema = new mongoose.Schema({
+  question: {
+    type: String,
+    required: true,
+  },
+  answer: {
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const Chat = mongoose.model("Chat", chatSchema);
+
 app.get("/", (req, res) => {
   res.send("AI Guru backend is running 🚀");
 });
@@ -66,6 +85,11 @@ Guidelines:
     });
 
     const answer = chatCompletion.choices[0].message.content;
+    await Chat.create({
+      question,
+      answer,
+    });
+
     res.json({ answer });
   } catch (error) {
     console.error("Groq error:", error);
@@ -74,6 +98,16 @@ Guidelines:
       answer:
         "AI Guru is currently busy. Please wait a few seconds and try again.",
     });
+  }
+});
+
+app.get("/chats", async (req, res) => {
+  try {
+    const chats = await Chat.find().sort({ createdAt: -1 }).limit(20);
+
+    res.json(chats);
+  } catch (error) {
+    res.status(500).json({ error: "Unable to fetch chats" });
   }
 });
 

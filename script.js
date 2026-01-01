@@ -41,3 +41,19 @@ function addMessage(text, sender) {
   chatBox.appendChild(msgDiv);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
+
+async function loadChatHistory() {
+  try {
+    const response = await fetch("https://ai-guru-lye7.onrender.com/chats");
+    const chats = await response.json();
+
+    chats.reverse().forEach((chat) => {
+      addMessage(chat.question, "user");
+      addMessage(chat.answer, "ai");
+    });
+  } catch (error) {
+    console.error("Failed to load chat history");
+  }
+}
+
+window.onload = loadChatHistory;
